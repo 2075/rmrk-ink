@@ -21,12 +21,9 @@ use traits::{
 use ink_prelude::vec::Vec;
 use ink_storage::Mapping;
 
-use openbrush::{
-    contracts::psp34::extensions::enumerable::*,
-    traits::{
-        AccountId,
-        Storage,
-    },
+use openbrush::traits::{
+    AccountId,
+    Storage,
 };
 
 pub const STORAGE_NESTING_KEY: u32 = openbrush::storage_unique_key!(NestingData);
@@ -40,7 +37,7 @@ pub struct NestingData {
 
 impl<T> Nesting for T
 where
-    T: Storage<NestingData> + Storage<psp34::Data<enumerable::Balances>> + Utils,
+    T: Storage<NestingData> + Internal + Utils,
 {
     /// Add a child NFT (from different collection) to the NFT in this collection
     /// The status of the added child is `Pending` if caller is not owner of child NFT
@@ -248,7 +245,7 @@ where
 /// Event trait for Nesting
 impl<T> NestingEvents for T
 where
-    T: Storage<NestingData> + Storage<psp34::Data<enumerable::Balances>>,
+    T: Storage<NestingData>,
 {
     /// Emit ChildAdded event
     default fn _emit_added_child_event(

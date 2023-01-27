@@ -5,19 +5,15 @@ use crate::{
 
 use rmrk_common::{
     errors::RmrkError,
+    implementations::psp34::Core,
     types::*,
 };
 
-use ink_env::CallFlags;
 use ink_prelude::vec::Vec;
-
-use openbrush::{
-    contracts::psp34::extensions::enumerable::*,
-    traits::{
-        AccountId,
-        Storage,
-        String,
-    },
+use openbrush::traits::{
+    AccountId,
+    Storage,
+    String,
 };
 
 /// Trait implementation for Internal Nesting functions.
@@ -66,7 +62,7 @@ pub trait Internal {
 /// Implement internal helper trait for Nesting
 impl<T> Internal for T
 where
-    T: Storage<NestingData> + Storage<psp34::Data<enumerable::Balances>>,
+    T: Storage<NestingData> + Core<Id, PSP34Error>,
 {
     /// Check if child is already accepted
     default fn accepted(
@@ -204,10 +200,7 @@ where
         caller: AccountId,
         parent_token_id: &Id,
     ) -> Result<(), PSP34Error> {
-        if let Some(token_owner) = self
-            .data::<psp34::Data<enumerable::Balances>>()
-            .owner_of(parent_token_id.clone())
-        {
+        if let Some(token_owner) = self._get_owner_of(parent_token_id.clone()) {
             if token_owner != caller {
                 return Err(PSP34Error::Custom(String::from(
                     RmrkError::NotTokenOwner.as_str(),
@@ -223,15 +216,6 @@ where
         to: AccountId,
         child_nft: ChildNft,
     ) -> Result<(), PSP34Error> {
-        // TODO check child collection is approved by this (parent) collection
-        // let collection = self.get_collection(child_nft.0)
-        //      .ok_or(RmrkError::ChildContractNotApproved)?;
-
-        PSP34Ref::transfer_builder(&child_nft.0, to, child_nft.1, Vec::new())
-            .call_flags(CallFlags::default().set_allow_reentry(true))
-            .fire()
-            .unwrap()?;
-
-        Ok(())
+        self._transfer_child_ownership(to, child_nft)
     }
 }

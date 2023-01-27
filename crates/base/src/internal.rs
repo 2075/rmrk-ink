@@ -5,12 +5,9 @@ use rmrk_common::{
     types::*,
 };
 
-use openbrush::{
-    contracts::psp34::extensions::enumerable::*,
-    traits::{
-        Storage,
-        String,
-    },
+use openbrush::traits::{
+    Storage,
+    String,
 };
 
 /// Implement internal helper trait for Base

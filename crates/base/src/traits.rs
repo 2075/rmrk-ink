@@ -6,12 +6,9 @@ use ink_prelude::{
     string::String as PreludeString,
     vec::Vec,
 };
-use openbrush::{
-    contracts::psp34::PSP34Error,
-    traits::{
-        AccountId,
-        String,
-    },
+use openbrush::traits::{
+    AccountId,
+    String,
 };
 
 #[openbrush::wrapper]

@@ -6,12 +6,20 @@ use ink_storage::traits::{
     SpreadLayout,
 };
 use openbrush::{
-    contracts::psp34::Id,
+    contracts::psp34::extensions::{
+        enumerable,
+        metadata,
+    },
     traits::{
         AccountId,
         String,
     },
 };
+
+// Should be controlled via cargo flags (based on chosen imoplementation)
+pub use enumerable::PSP34Error;
+pub type Id = enumerable::Id;
+pub type MetadataData = metadata::Data;
 
 // Collection id is the address of child contract
 pub type CollectionId = AccountId;

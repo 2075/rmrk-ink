@@ -15,10 +15,7 @@ use rmrk_multiasset::{
 use crate::EquippableData;
 
 use openbrush::{
-    contracts::{
-        ownable::*,
-        psp34::extensions::enumerable::*,
-    },
+    contracts::ownable::*,
     traits::{
         AccountId,
         Storage,

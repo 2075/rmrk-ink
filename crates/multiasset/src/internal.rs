@@ -11,12 +11,9 @@ use rmrk_common::{
 
 use ink_prelude::vec::Vec;
 
-use openbrush::{
-    contracts::psp34::extensions::enumerable::*,
-    traits::{
-        Storage,
-        String,
-    },
+use openbrush::traits::{
+    Storage,
+    String,
 };
 
 /// Trait definitions for MultiAsset helper functions
@@ -65,7 +62,7 @@ pub trait Internal {
 /// Implement internal helper trait for MultiAsset
 impl<T> Internal for T
 where
-    T: Storage<MultiAssetData> + Storage<psp34::Data<enumerable::Balances>> + Utils,
+    T: Storage<MultiAssetData> + Utils,
 {
     /// Check if asset is already accepted
     default fn ensure_not_accepted(

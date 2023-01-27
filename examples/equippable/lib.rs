@@ -12,9 +12,10 @@ pub mod rmrk_example_equippable {
     use openbrush::{
         contracts::{
             ownable::*,
+            psp34,
             psp34::extensions::{
-                enumerable::*,
-                metadata::*,
+                enumerable,
+                metadata,
             },
             reentrancy_guard::*,
         },
@@ -192,7 +193,7 @@ pub mod rmrk_example_equippable {
     #[derive(Default, SpreadAllocate, Storage)]
     pub struct Rmrk {
         #[storage_field]
-        psp34: psp34::Data<enumerable::Balances>,
+        psp34: enumerable::psp34::Data<enumerable::Balances>,
         #[storage_field]
         guard: reentrancy_guard::Data,
         #[storage_field]
@@ -211,13 +212,13 @@ pub mod rmrk_example_equippable {
         equippable: EquippableData,
     }
 
-    impl PSP34 for Rmrk {}
+    impl enumerable::PSP34 for Rmrk {}
 
     impl Ownable for Rmrk {}
 
-    impl PSP34Metadata for Rmrk {}
+    impl metadata::PSP34Metadata for Rmrk {}
 
-    impl PSP34Enumerable for Rmrk {}
+    impl enumerable::PSP34Enumerable for Rmrk {}
 
     impl Minting for Rmrk {}
 
@@ -428,11 +429,10 @@ pub mod rmrk_example_equippable {
             });
         }
     }
-    
+
     #[cfg(test)]
     mod tests {
         use super::*;
-        use crate::rmrk_example_equippable::PSP34Error::*;
         use ink_env::{
             pay_with_call,
             test,
@@ -440,8 +440,16 @@ pub mod rmrk_example_equippable {
         };
         use ink_lang as ink;
         use ink_prelude::string::String as PreludeString;
+        use openbrush::contracts::psp34::{
+            extensions::{
+                enumerable::PSP34Enumerable,
+                metadata::PSP34Metadata,
+            },
+            PSP34,
+        };
         use rmrk::{
             errors::*,
+            types::PSP34Error::TokenNotExists,
             utils::Utils,
         };
 

@@ -23,7 +23,7 @@ rmrk_multiasset = { path = "../multiasset", default-features = false, optional =
 rmrk_nesting = { path = "../nesting", default-features = false, optional = true }
 rmrk_common = { path = "../common", default-features = false, optional = true }
 rmrk_equippable = { path = "../equippable", default-features = false, optional = true }
-
+ 
 [lib]
 path = "src/lib.rs"
 crate-type = ["rlib"]
@@ -48,7 +48,7 @@ std = [
     "rmrk_nesting/std",
     "rmrk_equippable/std",
 ]
-mintable = [ "rmrk_common", "rmrk_minting" ] 
+mintable = ["rmrk_common", "rmrk_minting" ] 
 equippable = ["mintable", "rmrk_base", "rmrk_multiasset", "rmrk_nesting", "rmrk_equippable"]
 
 

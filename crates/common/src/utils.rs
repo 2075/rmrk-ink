@@ -2,15 +2,18 @@
 
 use ink_prelude::string::String as PreludeString;
 
-use crate::errors::RmrkError;
+use crate::{
+    errors::RmrkError,
+    implementations::Core,
+    types::{
+        Id,
+        PSP34Error,
+    },
+};
 
 use openbrush::{
     contracts::{
         ownable::*,
-        psp34::extensions::{
-            enumerable::*,
-            metadata::*,
-        },
         reentrancy_guard::*,
     },
     modifiers,
@@ -20,7 +23,6 @@ use openbrush::{
         String,
     },
 };
-
 
 /// Trait definitions for Utils functions
 #[openbrush::trait_definition]
@@ -42,21 +44,12 @@ pub trait Utils {
 
 impl<T> Utils for T
 where
-    T: Storage<psp34::Data<enumerable::Balances>>
-        + Storage<reentrancy_guard::Data>
-        + Storage<ownable::Data>
-        + Storage<metadata::Data>
-        + psp34::extensions::metadata::PSP34Metadata
-        + psp34::Internal,
+    T: Storage<reentrancy_guard::Data> + Storage<ownable::Data> + Core<Id, PSP34Error>,
 {
     /// Set new value for the baseUri
     #[modifiers(only_owner)]
     default fn set_base_uri(&mut self, uri: PreludeString) -> Result<(), PSP34Error> {
-        let id = self
-            .data::<psp34::Data<enumerable::Balances>>()
-            .collection_id();
-        self.data::<metadata::Data>()
-            ._set_attribute(id, String::from("baseUri"), uri.into_bytes());
+        self._set_attribute(String::from("baseUri"), uri);
         Ok(())
     }
 
@@ -75,8 +68,7 @@ where
     /// Check if token is minted. Return the owner
     default fn ensure_exists_and_get_owner(&self, id: &Id) -> Result<AccountId, PSP34Error> {
         let token_owner = self
-            .data::<psp34::Data<enumerable::Balances>>()
-            .owner_of(id.clone())
+            ._get_owner_of(id.clone())
             .ok_or(PSP34Error::TokenNotExists)?;
         Ok(token_owner)
     }

@@ -23,10 +23,7 @@ use ink_prelude::vec::Vec;
 use ink_storage::Mapping;
 
 use openbrush::{
-    contracts::{
-        ownable::*,
-        psp34::extensions::enumerable::*,
-    },
+    contracts::ownable::*,
     modifiers,
     traits::{
         Storage,
@@ -54,10 +51,7 @@ pub struct MultiAssetData {
 
 impl<T> MultiAsset for T
 where
-    T: Storage<MultiAssetData>
-        + Storage<psp34::Data<enumerable::Balances>>
-        + Storage<ownable::Data>
-        + Utils,
+    T: Storage<MultiAssetData> + Storage<ownable::Data> + Internal + Utils,
 {
     /// Used to add a asset entry.
     #[modifiers(only_owner)]

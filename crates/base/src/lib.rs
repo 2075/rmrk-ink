@@ -21,10 +21,7 @@ use ink_prelude::{
 use ink_storage::Mapping;
 
 use openbrush::{
-    contracts::{
-        ownable::*,
-        psp34::extensions::enumerable::*,
-    },
+    contracts::ownable::*,
     modifiers,
     traits::{
         AccountId,

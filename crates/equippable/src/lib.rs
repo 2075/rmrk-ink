@@ -7,6 +7,7 @@ pub mod internal;
 pub mod traits;
 
 use internal::Internal;
+
 use rmrk_base::{
     traits::Base,
     BaseData,
@@ -32,10 +33,7 @@ use traits::{
 use ink_storage::Mapping;
 
 use openbrush::{
-    contracts::{
-        ownable::*,
-        psp34::extensions::enumerable::*,
-    },
+    contracts::ownable::*,
     traits::{
         AccountId,
         Storage,

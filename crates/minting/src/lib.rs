@@ -9,7 +9,10 @@ pub mod traits;
 use internal::Internal;
 
 use rmrk_common::{
-    errors::RmrkError,
+    types::{
+        Id,
+        PSP34Error,
+    },
     utils::Utils,
 };
 
@@ -22,10 +25,6 @@ use ink_storage::Mapping;
 use openbrush::{
     contracts::{
         ownable::*,
-        psp34::extensions::{
-            enumerable::*,
-            metadata::*,
-        },
         reentrancy_guard::*,
     },
     modifiers,
@@ -53,30 +52,16 @@ pub struct MintingData {
 impl<T> Minting for T
 where
     T: Storage<MintingData>
-        + Storage<psp34::Data<enumerable::Balances>>
         + Storage<reentrancy_guard::Data>
         + Storage<ownable::Data>
-        + Storage<metadata::Data>
-        + psp34::extensions::metadata::PSP34Metadata
-        + psp34::Internal
+        + Internal
         + Utils,
 {
     /// Mint next available token for the caller
     default fn mint_next(&mut self) -> Result<(), PSP34Error> {
         self._check_value(Self::env().transferred_value(), 1)?;
         let caller = Self::env().caller();
-        let token_id = self
-            .data::<MintingData>()
-            .last_token_id
-            .checked_add(1)
-            .ok_or(PSP34Error::Custom(String::from(
-                RmrkError::CollectionIsFull.as_str(),
-            )))?;
-        self.data::<psp34::Data<enumerable::Balances>>()
-            ._mint_to(caller, Id::U64(token_id))?;
-        self.data::<MintingData>().last_token_id += 1;
-
-        self._emit_transfer_event(None, Some(caller), Id::U64(token_id));
+        self._mint_next(caller)?;
         return Ok(())
     }
 
@@ -89,11 +74,8 @@ where
         let next_to_mint = self.data::<MintingData>().last_token_id + 1; // first mint id is 1
         let mint_offset = next_to_mint + mint_amount;
 
-        for mint_id in next_to_mint..mint_offset {
-            self.data::<psp34::Data<enumerable::Balances>>()
-                ._mint_to(to, Id::U64(mint_id))?;
-            self.data::<MintingData>().last_token_id += 1;
-            self._emit_transfer_event(None, Some(to), Id::U64(mint_id));
+        for _ in next_to_mint..mint_offset {
+            self._mint_next(to)?;
         }
 
         Ok(())
@@ -106,21 +88,10 @@ where
         metadata: PreludeString,
         to: AccountId,
     ) -> Result<(), PSP34Error> {
-        let token_id = self
-            .data::<MintingData>()
-            .last_token_id
-            .checked_add(1)
-            .ok_or(PSP34Error::Custom(String::from(
-                RmrkError::CollectionIsFull.as_str(),
-            )))?;
-        self.data::<psp34::Data<enumerable::Balances>>()
-            ._mint_to(to, Id::U64(token_id))?;
+        let token_id = self._mint_next(to)?;
         self.data::<MintingData>()
             .nft_metadata
             .insert(Id::U64(token_id), &String::from(metadata));
-        self.data::<MintingData>().last_token_id += 1;
-
-        self._emit_transfer_event(None, Some(to), Id::U64(token_id));
         return Ok(())
     }
 
@@ -147,11 +118,7 @@ where
                 uri = PreludeString::from_utf8(token_uri).unwrap();
             }
             None => {
-                let value = self.get_attribute(
-                    self.data::<psp34::Data<enumerable::Balances>>()
-                        .collection_id(),
-                    String::from("baseUri"),
-                );
+                let value = self._get_attribute(String::from("baseUri"));
                 let token_uri = PreludeString::from_utf8(value.unwrap()).unwrap();
                 uri = token_uri + &token_id.to_string() + &PreludeString::from(".json");
             }
